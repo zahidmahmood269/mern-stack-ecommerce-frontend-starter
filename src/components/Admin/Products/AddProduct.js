@@ -9,6 +9,7 @@ import SuccessMsg from "../../SuccessMsg/SuccessMsg";
 import { fetchCategoriesAction } from "../../../redux/slices/categories/categoriesSlice";
 import { fetchBrandAction } from "../../../redux/slices/brands/brandsSlice";
 import { fetchColorAction } from "../../../redux/slices/colors/colorsSlice";
+import { createProductAction } from "../../../redux/slices/products/productSlices";
 
 //animated components for react-select
 const animatedComponents = makeAnimated();
@@ -16,8 +17,16 @@ const animatedComponents = makeAnimated();
 export default function AddProduct() {
   const dispatch = useDispatch();
 
-  const sizes = ["S", "M", "L", "XL", "XXL"];
   const [sizeOption, setSizeOption] = useState([]);
+  const [colorOption, setColorOption] = useState([]);
+  const [files, setFiles] = useState([]);
+
+  const handleFiles = (event) => {
+    const newFiles = Array.from(event.target.files);
+    setFiles(newFiles);
+  };
+
+  const sizes = ["S", "M", "L", "XL", "XXL"];
 
   const handleSizeChange = (sizes) => {
     setSizeOption(sizes);
@@ -46,20 +55,21 @@ export default function AddProduct() {
   const { colors } = useSelector((state) => state?.colors?.colorsList);
 
   const colorOptionsCoverted = colors?.map((color) => {
-    return { label: color?.name, value: color?._id };
+    return { label: color?.name, value: color?.name };
   });
 
-  let handleColorChangeOption, isAdded;
+  const handleColorChangeOption = (colors) => {
+    setColorOption(colors);
+  };
+
+  let isAdded;
 
   //---form data---
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     category: "",
-    sizes: "",
     brand: "",
-    colors: "",
-    images: "",
     price: "",
     totalQty: "",
   });
@@ -72,6 +82,14 @@ export default function AddProduct() {
   //onSubmit
   const handleOnSubmit = (e) => {
     e.preventDefault();
+
+    const finalData = {
+      ...formData,
+      sizes: sizeOption?.map((size) => size?.label),
+      colors: colorOption?.map((color) => color?.label),
+      files,
+    };
+    dispatch(createProductAction(finalData));
     //reset form data
     setFormData({
       name: "",
@@ -232,13 +250,14 @@ export default function AddProduct() {
                           <input
                             name="images"
                             value={formData.images}
-                            onChange={handleOnChange}
+                            onChange={handleFiles}
                             type="file"
+                            multiple
                           />
                         </label>
                       </div>
                       <p className="text-xs text-gray-500">
-                        PNG, JPG, GIF up to 10MB
+                        PNG, JPG, GIF up to 1MB
                       </p>
                     </div>
                   </div>

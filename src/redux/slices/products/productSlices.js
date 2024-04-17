@@ -1,6 +1,6 @@
 import axios from "axios";
 import baseURL from "../../../utils/baseURL";
-
+import { token, tokenForUploadImage } from "../../../utils/config";
 const { createAsyncThunk, createSlice } = require("@reduxjs/toolkit");
 
 // initial state
@@ -19,29 +19,37 @@ export const createProductAction = createAsyncThunk(
   "products/create",
   async (payload, { rejectWithValue, getState, dispatch }) => {
     try {
-      // token authentication
-      const token = getState()?.users?.userAuth?.userInfo?.token;
-      const config = {
-        headers: {
-          Authorization: `Bearer  + ${token}`,
-        },
-      };
+      const {
+        name,
+        description,
+        category,
+        sizes,
+        brand,
+        colors,
+        price,
+        totalQty,
+        files,
+      } = payload;
 
-      const { name, description, category, sizes, brand, colors, price } =
-        payload;
-      const { data } = await axios.post(
-        `${baseURL}/products`,
-        {
-          name,
-          description,
-          category,
-          sizes,
-          brand,
-          colors,
-          price,
-        },
-        config
-      );
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("category", category);
+      formData.append("brand", brand);
+      formData.append("price", price);
+      formData.append("totalQty", totalQty);
+
+      colors.forEach((color) => {
+        formData.append("colors", color);
+      });
+      sizes.forEach((size) => {
+        formData.append("sizes", size);
+      });
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const { data } = await axios.post(`${baseURL}products`, formData, token);
       return data;
     } catch (error) {
       return rejectWithValue(error?.response?.data);

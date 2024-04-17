@@ -4,8 +4,8 @@ export const apiUrl = axios.create({
   baseURL: "http://localhost:2030/api/v1/",
 });
 
-export const userInfo = localStorage.getItem("users?.userAuth?.userInfo")
-  ? JSON.parse(localStorage.getItem("users?.userAuth?.userInfo"))
+export const userInfo = localStorage.getItem("userInfo")
+  ? JSON.parse(localStorage.getItem("userInfo"))
   : null;
 
 export const token = {
